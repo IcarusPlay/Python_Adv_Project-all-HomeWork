@@ -96,3 +96,64 @@ class Post(models.Model):
 # models.OneToOneField  # o2o => один к одному
 # models.ManyToManyField  # m2m => многие ко многим
 # models.ForeignKey  # o2m => один ко многим
+
+
+
+
+
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Task(models.Model):
+
+    NEW = 'New'
+    IN_PROGRESS = 'In progress'
+    PENDING = 'Pending'
+    BLOCKED = 'Blocked'
+    DONE = 'Done'
+
+    STATUS_CHOICES = [
+        (NEW, 'New'),
+        (IN_PROGRESS, 'In progress'),
+        (PENDING, 'Pending'),
+        (BLOCKED, 'Blocked'),
+        (DONE, 'Done'),
+    ]
+
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    categories = models.ManyToManyField('Category')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=NEW)
+    deadline = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class SubTask(models.Model):
+    NEW = 'New'
+    IN_PROGRESS = 'In progress'
+    PENDING = 'Pending'
+    BLOCKED = 'Blocked'
+    DONE = 'Done'
+
+    STATUS_CHOICES = [
+        (NEW, 'New'),
+        (IN_PROGRESS, 'In progress'),
+        (PENDING, 'Pending'),
+        (BLOCKED, 'Blocked'),
+        (DONE, 'Done'),
+    ]
+
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    task = models.ForeignKey(
+        'Task',
+        on_delete=models.CASCADE,
+        related_name='subtasks'
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=NEW)
+    deadline = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
