@@ -14,6 +14,7 @@ class SubTaskInline(admin.TabularInline):
     model = SubTask
     extra = 1
 
+
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ('id', 'short_title', 'status', 'deadline', 'created_at')
@@ -24,13 +25,14 @@ class TaskAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     inlines = [SubTaskInline]  # Задание 1: добавляем инлайн
 
-
     def short_title(self, obj):
         if len(obj.title) > 10:
             return obj.title[:10] + '...'
         return obj.title
 
-    short_title.short_description = 'Title'
+    short_title.short_description = 'Title'  # название колонки в списке
+
+
 
 def mark_done(modeladmin, request, queryset):
     queryset.update(status=SubTask.DONE)
