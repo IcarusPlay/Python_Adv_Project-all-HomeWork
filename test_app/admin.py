@@ -24,7 +24,7 @@ class TaskAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     inlines = [SubTaskInline]  # Задание 1: добавляем инлайн
 
-    # Задание 2: укороченное название в списке задач
+
     def short_title(self, obj):
         if len(obj.title) > 10:
             return obj.title[:10] + '...'
