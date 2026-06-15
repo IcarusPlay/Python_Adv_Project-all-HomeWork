@@ -1,0 +1,375 @@
+ㅤ
+  РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ API — Generic Views
+  Tasks + SubTasks (CRUD, фильтры, поиск, сортировка, пагинация)
+ㅤ
+
+
+ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ--
+ ЗАДАНИЕ 1 — Tasks (TaskListCreateView / TaskRetrieveUpdateDestroyView)
+ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ--
+
+ㅤ Тест 1: Создание задачи (POST) ㅤ
+
+Request:
+  POST /api/tasks/
+  Content-Type: application/json
+  {
+      "title": "Сделать домашку",
+      "description": "Generic Views тест",
+      "status": "New",
+      "deadline": "2026-08-01T10:00:00Z"
+  }
+
+Response:
+  Status: 201 Created
+  {
+      "id": 1,
+      "title": "Сделать домашку",
+      "description": "Generic Views тест",
+      "status": "New",
+      "deadline": "2026-08-01T12:00:00+02:00",
+      "created_at": "2026-06-15T18:37:51.715071+02:00"
+  }
+
+
+ㅤ Тест 2: Создание второй задачи (POST) ㅤ
+
+Request:
+  POST /api/tasks/
+  Content-Type: application/json
+  {
+      "title": "Прочитать доку",
+      "description": "про generic views и filters",
+      "status": "In progress",
+      "deadline": "2025-05-01T12:00:00Z"
+  }
+
+Response:
+  Status: 201 Created
+  {
+      "id": 2,
+      "title": "Прочитать доку",
+      "description": "про generic views и filters",
+      "status": "In progress",
+      "deadline": "2025-05-01T14:00:00+02:00",
+      "created_at": "2026-06-15T18:37:51.724134+02:00"
+  }
+
+
+ㅤ Тест 3: Получение списка задач (GET) ㅤ
+
+Request:
+  GET /api/tasks/
+
+Response:
+  Status: 200 OK
+  [
+      {
+          "id": 2,
+          "title": "Прочитать доку",
+          "description": "про generic views и filters",
+          "status": "In progress",
+          "deadline": "2025-05-01T14:00:00+02:00",
+          "created_at": "2026-06-15T18:37:51.724134+02:00"
+      },
+      {
+          "id": 1,
+          "title": "Сделать домашку",
+          "description": "Generic Views тест",
+          "status": "New",
+          "deadline": "2026-08-01T12:00:00+02:00",
+          "created_at": "2026-06-15T18:37:51.715071+02:00"
+      }
+  ]
+
+
+ㅤ Тест 4: Фильтрация по статусу (?status=New) ㅤ
+
+Request:
+  GET /api/tasks/?status=New
+
+Response:
+  Status: 200 OK
+  [
+      {
+          "id": 1,
+          "title": "Сделать домашку",
+          "description": "Generic Views тест",
+          "status": "New",
+          "deadline": "2026-08-01T12:00:00+02:00",
+          "created_at": "2026-06-15T18:37:51.715071+02:00"
+      }
+  ]
+
+
+ㅤ Тест 5: Поиск по title/description (?search=домашк) ㅤ
+
+Request:
+  GET /api/tasks/?search=домашк
+
+Response:
+  Status: 200 OK
+  [
+      {
+          "id": 1,
+          "title": "Сделать домашку",
+          "description": "Generic Views тест",
+          "status": "New",
+          "deadline": "2026-08-01T12:00:00+02:00",
+          "created_at": "2026-06-15T18:37:51.715071+02:00"
+      }
+  ]
+
+
+ㅤ Тест 6: Сортировка по created_at — по возрастанию (?ordering=created_at) ㅤ
+
+Request:
+  GET /api/tasks/?ordering=created_at
+
+Response:
+  Status: 200 OK
+  Порядок title: ["Сделать домашку", "Прочитать доку"]
+
+
+ㅤ Тест 7: Сортировка по created_at — по убыванию (?ordering=-created_at) ㅤ
+
+Request:
+  GET /api/tasks/?ordering=-created_at
+
+Response:
+  Status: 200 OK
+  Порядок title: ["Прочитать доку", "Сделать домашку"]
+
+
+ㅤ Тест 8: Получение конкретной задачи (GET по id) ㅤ
+
+Request:
+  GET /api/tasks/1/
+
+Response:
+  Status: 200 OK
+  {
+      "id": 1,
+      "title": "Сделать домашку",
+      "description": "Generic Views тест",
+      "status": "New",
+      "deadline": "2026-08-01T12:00:00+02:00",
+      "created_at": "2026-06-15T18:37:51.715071+02:00"
+  }
+
+
+ㅤ Тест 9: Полное обновление задачи (PUT) ㅤ
+
+Request:
+  PUT /api/tasks/1/
+  Content-Type: application/json
+  {
+      "title": "Обновлённая задача",
+      "description": "обновили через PUT",
+      "status": "In progress",
+      "deadline": "2026-09-01T10:00:00Z"
+  }
+
+Response:
+  Status: 200 OK
+  {
+      "id": 1,
+      "title": "Обновлённая задача",
+      "description": "обновили через PUT",
+      "status": "In progress",
+      "deadline": "2026-09-01T12:00:00+02:00",
+      "created_at": "2026-06-15T18:37:51.715071+02:00"
+  }
+
+
+ㅤ Тест 10: Частичное обновление задачи (PATCH) ㅤ
+
+Request:
+  PATCH /api/tasks/1/
+  Content-Type: application/json
+  {
+      "status": "Done"
+  }
+
+Response:
+  Status: 200 OK
+  {
+      "id": 1,
+      "title": "Обновлённая задача",
+      "description": "обновили через PUT",
+      "status": "Done",
+      "deadline": "2026-09-01T12:00:00+02:00",
+      "created_at": "2026-06-15T18:37:51.715071+02:00"
+  }
+
+
+ㅤ Тест 11: Удаление задачи (DELETE) ㅤ
+
+Request:
+  DELETE /api/tasks/2/
+
+Response:
+  Status: 204 No Content
+
+
+ㅤ Тест 12: Статистика по задачам (агрегирующий эндпоинт, не менялся) ㅤ
+
+Request:
+  GET /api/tasks/stats/
+
+Response:
+  Status: 200 OK
+  {
+      "total_tasks": 1,
+      "by_status": {
+          "Done": 1
+      },
+      "overdue_tasks": 0
+  }
+
+
+ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ--
+ ЗАДАНИЕ 2 — SubTasks (SubTaskListCreateView / SubTaskRetrieveUpdateDestroyView)
+ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ--
+
+ㅤ Тест 13: Создание 6 подзадач для одной задачи (POST x6) ㅤ
+
+Request (повторяется 6 раз, title меняется: "Подзадача 1" ... "Подзадача 6"):
+  POST /api/subtasks/
+  Content-Type: application/json
+  {
+      "title": "Подзадача 1",
+      "description": "описание 1",
+      "task": 3,
+      "status": "New",
+      "deadline": "2026-08-01T10:00:00Z"
+  }
+
+Response (для каждого запроса):
+  Status: 201 Created
+
+
+ㅤ Тест 14: Список подзадач — страница 1, пагинация по 5 (GET) ㅤ
+
+Request:
+  GET /api/subtasks/
+
+Response:
+  Status: 200 OK
+  {
+      "count": 6,
+      "next": "http://testserver/api/subtasks/?page=2",
+      "previous": null,
+      "results": [
+          {"id": 6, "title": "Подзадача 6", ...},
+          {"id": 5, "title": "Подзадача 5", ...},
+          {"id": 4, "title": "Подзадача 4", ...},
+          {"id": 3, "title": "Подзадача 3", ...},
+          {"id": 2, "title": "Подзадача 2", ...}
+      ]
+  }
+  (5 объектов на странице — сортировка по убыванию даты создания)
+
+
+ㅤ Тест 15: Список подзадач — страница 2 (GET ?page=2) ㅤ
+
+Request:
+  GET /api/subtasks/?page=2
+
+Response:
+  Status: 200 OK
+  {
+      "count": 6,
+      "next": null,
+      "previous": "http://testserver/api/subtasks/",
+      "results": [
+          {"id": 1, "title": "Подзадача 1", ...}
+      ]
+  }
+  (1 объект — последняя страница)
+
+
+ㅤ Тест 16: Фильтрация подзадач по статусу (?status=New) ㅤ
+
+Request:
+  GET /api/subtasks/?status=New
+
+Response:
+  Status: 200 OK
+  "count": 6   (все 6 подзадач созданы со статусом New)
+
+
+ㅤ Тест 17: Поиск подзадач по title/description (?search=Подзадача 3) ㅤ
+
+Request:
+  GET /api/subtasks/?search=Подзадача 3
+
+Response:
+  Status: 200 OK
+  "count": 1
+  results: [{"title": "Подзадача 3", ...}]
+
+
+ㅤ Тест 18: Сортировка подзадач по убыванию created_at (?ordering=-created_at) ㅤ
+
+Request:
+  GET /api/subtasks/?ordering=-created_at
+
+Response:
+  Status: 200 OK
+  Порядок title: ["Подзадача 6", "Подзадача 5", "Подзадача 4", "Подзадача 3", "Подзадача 2"]
+
+
+ㅤ Тест 19: Получение конкретной подзадачи (GET по id) ㅤ
+
+Request:
+  GET /api/subtasks/1/
+
+Response:
+  Status: 200 OK
+  {
+      "id": 1,
+      "title": "Подзадача 1",
+      "description": "описание 1",
+      "task": 3,
+      "status": "New",
+      "deadline": "2026-08-01T12:00:00+02:00",
+      "created_at": "2026-06-15T18:38:10.838288+02:00"
+  }
+
+
+ㅤ Тест 20: Частичное обновление подзадачи (PATCH) 
+
+Request:
+  PATCH /api/subtasks/1/
+  Content-Type: application/json
+  {
+      "status": "Done"
+  }
+
+Response:
+  Status: 200 OK
+  {
+      "id": 1,
+      "title": "Подзадача 1",
+      "description": "описание 1",
+      "task": 3,
+      "status": "Done",
+      "deadline": "2026-08-01T12:00:00+02:00",
+      "created_at": "2026-06-15T18:38:10.838288+02:00"
+  }
+
+
+ㅤ Тест 21: Удаление подзадачи (DELETE) ㅤ
+
+Request:
+  DELETE /api/subtasks/6/
+
+Response:
+  Status: 204 No Content
+
+
+
+  Итого 21 тест — все прошли успешно
+  Покрыты: создание, получение, обновление (PUT/PATCH),
+  удаление, фильтрация, поиск, сортировка, пагинация
