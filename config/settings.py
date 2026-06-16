@@ -135,3 +135,87 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+
+# Задание 1: Глобальная пагинация
+# CursorPagination — не показывает номер страницы в URL,
+# вместо этого использует cursor (зашифрованный токен позиции).
+# Безопаснее чем PageNumberPagination, потому что:
+# - нельзя угадать сколько всего страниц
+# - нельзя перепрыгнуть на произвольную страницу по номеру
+# - не раскрывает структуру данных через параметры запроса
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
+    'PAGE_SIZE': 6,
+}
+
+
+# Задание 2: Логирование
+
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)  # создаём папку logs если её нет
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        # формат для консоли — покороче
+        'console_fmt': {
+            'format': '[{asctime}] {levelname} {name}: {message}',
+            'style': '{',
+            'datefmt': '%H:%M:%S',
+        },
+        # формат для файлов — подробнее
+        'file_fmt': {
+            'format': '[{asctime}] {levelname} {name}: {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+
+    'handlers': {
+        # Консоль — для логов сервера (django)
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console_fmt',
+        },
+        # Файл для HTTP запросов
+        'http_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'http_logs.log',
+            'formatter': 'file_fmt',
+            'encoding': 'utf-8',
+        },
+        # Файл для запросов в БД
+        'db_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'db_logs.log',
+            'formatter': 'file_fmt',
+            'encoding': 'utf-8',
+        },
+    },
+
+    'loggers': {
+        # логи работы сервера — в консоль
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # логи HTTP запросов и статусов — в файл
+        'django.request': {
+            'handlers': ['http_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # логи запросов в БД — в файл
+        'django.db.backends': {
+            'handlers': ['db_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
