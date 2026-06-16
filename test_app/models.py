@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Book(models.Model):
@@ -38,11 +39,30 @@ class Post(models.Model):
     reading_time = models.DurationField(null=True)
 
 
+# Задание 2: кастомный менеджер — по умолчанию не показывает удалённые категории
+class CategoryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
 
+    # Задание 2: поля для мягкого удаления
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    # подключаем кастомный менеджер
+    objects = CategoryManager()
+
     def __str__(self):
         return self.name
+
+    # Задание 2: переопределяем delete — не удаляем из БД, просто помечаем
+    def delete(self, using=None, keep_parents=False):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
 
     class Meta:
         db_table = 'task_manager_category'

@@ -67,3 +67,10 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         if value and value < timezone.now():
             raise serializers.ValidationError('Дедлайн не может быть в прошлом')
         return value
+
+
+# Задание 1: сериализатор для CategoryViewSet
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name']

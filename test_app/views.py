@@ -87,3 +87,26 @@ class SubTaskListCreateView(generics.ListCreateAPIView):
 class SubTaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
     serializer_class = SubTaskCreateSerializer
+
+
+# Задание 1: ModelViewSet для категорий
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from test_app.models import Category
+from test_app.serializers import CategorySerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    # Задание 1: кастомный метод — кол-во задач в каждой категории
+    @action(detail=False, methods=['get'], url_path='count_tasks')
+    def count_tasks(self, request):
+        # берём все категории и считаем связанные задачи через related_name
+        categories = Category.objects.annotate(task_count=Count('task'))
+        data = [
+            {'id': cat.id, 'name': cat.name, 'task_count': cat.task_count}
+            for cat in categories
+        ]
+        return Response(data)
