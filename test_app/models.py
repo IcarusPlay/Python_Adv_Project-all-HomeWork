@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 class Book(models.Model):
@@ -39,7 +40,6 @@ class Post(models.Model):
     reading_time = models.DurationField(null=True)
 
 
-# Задание 2: кастомный менеджер — по умолчанию не показывает удалённые категории
 class CategoryManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
@@ -47,18 +47,14 @@ class CategoryManager(models.Manager):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-
-    # Задание 2: поля для мягкого удаления
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
-    # подключаем кастомный менеджер
     objects = CategoryManager()
 
     def __str__(self):
         return self.name
 
-    # Задание 2: переопределяем delete — не удаляем из БД, просто помечаем
     def delete(self, using=None, keep_parents=False):
         self.is_deleted = True
         self.deleted_at = timezone.now()
@@ -93,6 +89,16 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=NEW)
     deadline = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Задание 1: владелец задачи — тот кто создал
+    # null=True чтобы старые записи в БД не сломались
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tasks'
+    )
 
     def __str__(self):
         return self.title
@@ -131,6 +137,15 @@ class SubTask(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=NEW)
     deadline = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Задание 1: владелец подзадачи
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='subtasks'
+    )
 
     def __str__(self):
         return self.title

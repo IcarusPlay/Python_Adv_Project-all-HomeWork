@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'test_app',
     'rest_framework',
+    'rest_framework_simplejwt',
     'django_filters',
+    'drf_yasg',  # Задание 3: Swagger
 ]
 
 MIDDLEWARE = [
@@ -138,11 +140,34 @@ STATIC_URL = 'static/'
 
 
 
+# Задание 1: JWT аутентификация через SimpleJWT
+# Задание 2: Глобальные пермишены — только авторизованные пользователи
+# Задание 3: Глобальная пагинация — PageNumberPagination, 5 элементов
 
+from datetime import timedelta
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
-    'PAGE_SIZE': 6,
+    # Задание 1: указываем что используем JWT токены
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+
+    # Задание 2: по умолчанию требуем авторизацию на всех эндпоинтах
+    # IsAuthenticated — только авторизованные пользователи могут обращаться к API
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+
+    # Задание 3: глобальная пагинация — PageNumberPagination, 5 штук на страницу
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
+}
+
+# Задание 1: настройки SimpleJWT
+# access токен живёт 60 минут, refresh — 7 дней
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
 

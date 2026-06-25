@@ -3,24 +3,27 @@ from django.utils import timezone
 from test_app.models import Task, SubTask, Category
 
 
-# старый сериализатор оставляем — используется в TaskCreateView и других вьюхах
 class TaskSerializer(serializers.ModelSerializer):
+    # Задание 1: owner только для чтения — устанавливается автоматически во view
+    owner = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'owner']
+        read_only_fields = ['id', 'created_at', 'owner']
 
 
-# Задание 1: created_at только для чтения
 class SubTaskCreateSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
+    # Задание 1: owner только для чтения
+    owner = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = SubTask
-        fields = ['id', 'title', 'description', 'task', 'status', 'deadline', 'created_at']
+        fields = ['id', 'title', 'description', 'task', 'status', 'deadline', 'created_at', 'owner']
+        read_only_fields = ['owner']
 
 
-# Задание 2: проверка уникальности названия категории
 class CategoryCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -34,13 +37,11 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         name = validated_data.get('name', instance.name)
-        # проверяем что другая категория с таким именем не существует
         if Category.objects.filter(name=name).exclude(pk=instance.pk).exists():
             raise serializers.ValidationError({'name': 'Категория с таким названием уже существует'})
         return super().update(instance, validated_data)
 
 
-# Задание 3: вложенный сериализатор для подзадач
 class SubTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTask
@@ -48,7 +49,6 @@ class SubTaskSerializer(serializers.ModelSerializer):
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):
-    # related_name='subtasks' — поэтому указываем именно его
     subtasks = SubTaskSerializer(many=True, read_only=True)
 
     class Meta:
@@ -56,7 +56,6 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'status', 'deadline', 'created_at', 'subtasks']
 
 
-# Задание 4: валидация deadline — не может быть в прошлом
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
@@ -69,7 +68,6 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         return value
 
 
-# Задание 1: сериализатор для CategoryViewSet
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
