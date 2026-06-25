@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 
 from django.db.models import Count
@@ -23,10 +24,12 @@ def greetings(request: HttpRequest) -> HttpResponse:
     return HttpResponse("Hello, world. You're at the polls page.")
 
 
-# Задание 1: Generic Views для задач
+# Задание 2: Generic Views для задач
+# IsAuthenticatedOrReadOnly — читать могут все, создавать/менять только авторизованные
 class TaskListCreateView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Задание 2: пермишен
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
@@ -41,12 +44,17 @@ class TaskListCreateView(generics.ListCreateAPIView):
     ordering = ['-created_at']  # по умолчанию — сначала новые
 
 
+# Задание 2: для изменения и удаления — только авторизованные
 class TaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]  # Задание 2: изменять могут только авторизованные
 
 
+# Задание 2: статистика — доступна всем (публичная информация)
 class TaskStatsView(APIView):
+    permission_classes = [AllowAny]  # Задание 2: статистика публичная
+
     def get(self, request):
         total = Task.objects.count()
         by_status = Task.objects.values('status').annotate(count=Count('id'))
@@ -60,16 +68,16 @@ class TaskStatsView(APIView):
         })
 
 
-# пагинация для подзадач — 5 на страницу
-class SubTaskPagination(PageNumberPagination):
-    page_size = 5
-
+# Задание 3: убираем SubTaskPagination — теперь используется глобальная (5 штук)
+# раньше тут была отдельная pagination_class = SubTaskPagination, но
+# задание требует глобальную пагинацию, поэтому убираем её отсюда
 
 # Задание 2: Generic Views для подзадач
 class SubTaskListCreateView(generics.ListCreateAPIView):
     queryset = SubTask.objects.all()
     serializer_class = SubTaskCreateSerializer
-    pagination_class = SubTaskPagination
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Задание 2: пермишен
+    # pagination_class убрали — теперь работает глобальная из settings.py
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
@@ -87,20 +95,23 @@ class SubTaskListCreateView(generics.ListCreateAPIView):
 class SubTaskRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
     serializer_class = SubTaskCreateSerializer
+    permission_classes = [IsAuthenticated]  # Задание 2: изменять могут только авторизованные
 
 
-# Задание 1: ModelViewSet для категорий
+
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from test_app.models import Category
 from test_app.serializers import CategorySerializer
 
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]  # Задание 2: категории только для авторизованных
 
-    # Задание 1: кастомный метод — кол-во задач в каждой категории
+
     @action(detail=False, methods=['get'], url_path='count_tasks')
     def count_tasks(self, request):
         # берём все категории и считаем связанные задачи через related_name
@@ -110,3 +121,4 @@ class CategoryViewSet(viewsets.ModelViewSet):
             for cat in categories
         ]
         return Response(data)
+

@@ -138,13 +138,7 @@ STATIC_URL = 'static/'
 
 
 
-# Задание 1: Глобальная пагинация
-# CursorPagination — не показывает номер страницы в URL,
-# вместо этого использует cursor (зашифрованный токен позиции).
-# Безопаснее чем PageNumberPagination, потому что:
-# - нельзя угадать сколько всего страниц
-# - нельзя перепрыгнуть на произвольную страницу по номеру
-# - не раскрывает структуру данных через параметры запроса
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
